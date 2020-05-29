@@ -328,7 +328,7 @@ if __name__ == "__main__":
         if len(pred) == 0:
             predict_list.append('1')
         else:
-            predict_list.append(str(pred[0]+1))
+            predict_list.append(str(pred[0] + 1))
         real_list.append(img_paths[imgfile]['class'])
         visualized_output.save(os.path.join('imgout', imgfile))
         # print(flaw_only(predictions))
@@ -352,7 +352,6 @@ if __name__ == "__main__":
     print(cm)
     print(['{:.2%}'.format(x) for x in ps])
     print(['{:.2%}'.format(x) for x in rc])
-
 
 '''
         #这个是保存输出的预测图片，会在原图上额外绘画出识别的矩形框、mask、类别、分数等等
