@@ -332,7 +332,7 @@ if __name__ == "__main__":
         real_list.append(img_paths[imgfile]['class'])
         visualized_output.save(os.path.join('imgout', imgfile))
         # print(flaw_only(predictions))
-        # log会在控制台输出预测所花的时间等信息
+        # log会在控制台输出预测所花的时间等等信息
         # logger.info(
         #     "{}: detected {} instances in {:.2f}s".format(
         #         imgfile, len(predictions["instances"]), time.time() - start_time
