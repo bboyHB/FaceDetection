@@ -34,6 +34,7 @@ VAL_JSON = os.path.join(ANN_ROOT, 'instances_val2017.json')
 
 # 数据集类别元数据
 DATASET_CATEGORIES = [
+    #{"name": "0", "id": 1, "color": [220, 20, 60]},
     {"name": "1", "id": 1, "color": [220, 20, 60]},
     {"name": "2", "id": 2, "color": [21, 142, 185]},
     {"name": "3", "id": 3, "color": [0, 20, 60]},
@@ -165,7 +166,7 @@ def setup(args):
     cfg.MODEL.WEIGHTS = "detectron2://COCO-Detection/faster_rcnn_R_50_FPN_1x/137257794/model_final_b275ba.pkl" # 'output/model_final.pth'   # 预训练模型权重
     cfg.SOLVER.IMS_PER_BATCH = 2  # batch_size=2; iters_in_one_epoch = dataset_imgs/batch_size
     ITERS_IN_ONE_EPOCH = int(1500 / cfg.SOLVER.IMS_PER_BATCH) #int(1434 / cfg.SOLVER.IMS_PER_BATCH)
-    cfg.SOLVER.MAX_ITER = (ITERS_IN_ONE_EPOCH * 30) - 1  # 12 epochs
+    cfg.SOLVER.MAX_ITER = (ITERS_IN_ONE_EPOCH * 20) - 1  # 12 epochs
     cfg.SOLVER.BASE_LR = 0.02  #学习率
     cfg.SOLVER.MOMENTUM = 0.9
     cfg.SOLVER.WEIGHT_DECAY = 0.0001
@@ -175,7 +176,8 @@ def setup(args):
     cfg.SOLVER.WARMUP_FACTOR = 1.0 / 1000
     cfg.SOLVER.WARMUP_ITERS = 1000   # 这里WARMUP的作用就是学习率在一开始的ITERS范围内（这里是iteration从0到1000）过程中是从零开始线性递增的
     cfg.SOLVER.WARMUP_METHOD = "linear"
-    cfg.SOLVER.CHECKPOINT_PERIOD = ITERS_IN_ONE_EPOCH - 1   #每隔多少iteration输出一次loss结果
+    #cfg.SOLVER.CHECKPOINT_PERIOD = ITERS_IN_ONE_EPOCH - 1   #每隔多少iteration输出一次loss结果
+    cfg.TEST.EVAL_PERIOD = ITERS_IN_ONE_EPOCH - 1
 
     cfg.freeze()
     default_setup(cfg, args)

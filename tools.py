@@ -284,5 +284,5 @@ def re_label_json():
 
 
 if __name__ == '__main__':
-    plot_ratios()
+    #re_label_json()
     pass

@@ -17,6 +17,7 @@ np.random.seed(41)
 '''
 
 # 0为背景
+#classname_to_id = {"0": 1}
 classname_to_id = {"1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7}
 # 这些id和之后模型预测的编号会有所不同，模型预测的话，对应关系是：
 # {"watermark": 0, "commom1": 1, "flaw01": 2, "flaw02": 3, "flaw05": 4, "flaw07": 5, "other": 6}

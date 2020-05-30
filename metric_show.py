@@ -13,7 +13,7 @@ loss_cls = []
 loss_box_reg = []
 loss_rpn_cls = []
 loss_rpn_loc = []
-with open('./metrics/2/metrics.json') as metrics:
+with open('./metrics/3/metrics.json') as metrics:
     for line in metrics.readlines():
         datas = json.loads(line)
         iteration.append(datas['iteration'])
