@@ -18,7 +18,7 @@ np.random.seed(41)
 
 # 0为背景
 #classname_to_id = {"0": 1}
-classname_to_id = {"1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7}
+classname_to_id = {"Surprise": 1, "Fear": 2, "Disgust": 3, "Happy": 4, "Sad": 5, "Angry": 6, "Neutral": 7}
 # 这些id和之后模型预测的编号会有所不同，模型预测的话，对应关系是：
 # {"watermark": 0, "commom1": 1, "flaw01": 2, "flaw02": 3, "flaw05": 4, "flaw07": 5, "other": 6}
 # 输入虽然是0为背景，但是输出的预测信息是预测的矩形框的信息，预测的矩形框都是前景物体，所以不会输出背景类别，所以就把这些类别用0到6来表示了
@@ -107,7 +107,7 @@ class Lableme2CoCo:
 
 
 if __name__ == '__main__':
-    labelme_path = "random_300x7_img"
+    labelme_path = "all_img_json"
     saved_coco_path = "./datasets/"
     # 创建文件
     if not os.path.exists("%scoco/annotations/" % saved_coco_path):
