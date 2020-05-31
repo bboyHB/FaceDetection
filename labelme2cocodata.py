@@ -127,9 +127,9 @@ if __name__ == '__main__':
     train_instance = l2c_train.to_coco(train_path)
     l2c_train.save_coco_json(train_instance, '%scoco/annotations/instances_train2017.json' % saved_coco_path)
     for file in train_path:
-        shutil.copy(file.replace("json", "jpg"), "%scoco/train2017/" % saved_coco_path)
+        shutil.copy(file.replace(".json", ".jpg"), "%scoco/train2017/" % saved_coco_path)
     for file in val_path:
-        shutil.copy(file.replace("json", "jpg"), "%scoco/val2017/" % saved_coco_path)
+        shutil.copy(file.replace(".json", ".jpg"), "%scoco/val2017/" % saved_coco_path)
 
     # 把验证集转化为COCO的json格式
     l2c_val = Lableme2CoCo()
