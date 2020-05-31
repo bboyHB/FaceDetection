@@ -6,6 +6,8 @@ import time
 import cv2
 import tqdm
 import tools
+import base64
+from PIL import Image
 
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog, DatasetCatalog
@@ -49,6 +51,7 @@ OUTPUT_IMG_PATH = os.path.join(PROJECT_ROOT, 'imgout')
 
 # 数据集类别元数据
 DATASET_CATEGORIES = [
+    #{"name": "0", "id": 1, "color": [220, 20, 60]}
     {"name": "Surprise", "id": 1, "color": [220, 20, 60]},
     {"name": "Fear", "id": 2, "color": [21, 142, 185]},
     {"name": "Disgust", "id": 3, "color": [0, 20, 60]},
@@ -295,7 +298,7 @@ def contain_class(predict, real):
     return pred_classes[maxindex]
 
 
-if __name__ == "__main__":
+def do_test():
     mp.set_start_method("spawn", force=True)
     args = get_parser().parse_args()
     logger = setup_logger()
@@ -352,21 +355,71 @@ if __name__ == "__main__":
     print(cm)
     print(['{:.2%}'.format(x) for x in ps])
     print(['{:.2%}'.format(x) for x in rc])
-
-'''
-        #这个是保存输出的预测图片，会在原图上额外绘画出识别的矩形框、mask、类别、分数等等
-        if args.output:
-            if os.path.isdir(args.output):
-                assert os.path.isdir(args.output), args.output
-                out_filename = os.path.join(args.output, os.path.basename(imgfile))
+    '''
+            #这个是保存输出的预测图片，会在原图上额外绘画出识别的矩形框、mask、类别、分数等等
+            if args.output:
+                if os.path.isdir(args.output):
+                    assert os.path.isdir(args.output), args.output
+                    out_filename = os.path.join(args.output, os.path.basename(imgfile))
+                else:
+                    assert len(args.input) == 1, "Please specify a directory with args.output"
+                    out_filename = args.output
+                visualized_output.save(out_filename)
+            #这个是实时显示输出的预测图片，会在原图上额外绘画出识别的矩形框、mask、类别、分数等等
             else:
-                assert len(args.input) == 1, "Please specify a directory with args.output"
-                out_filename = args.output
-            visualized_output.save(out_filename)
-        #这个是实时显示输出的预测图片，会在原图上额外绘画出识别的矩形框、mask、类别、分数等等
-        else:
-            cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-            cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
-            if cv2.waitKey(0) == 27:
-                break  # esc to quit
-'''
+                cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
+                cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
+                if cv2.waitKey(0) == 27:
+                    break  # esc to quit
+    '''
+
+
+def img_base64(img_path):
+    with open(img_path, "rb") as f:
+        base64_str = base64.b64encode(f.read())
+    return base64_str
+
+
+def do_crop():
+    args = get_parser().parse_args()
+    logger = setup_logger()
+    logger.info("Arguments: " + str(args))
+
+    cfg = setup_cfg(args)
+
+    # 注册数据集
+    register_dataset()
+
+    model_demo = VisualizationDemo(cfg)
+
+    face_img_path = 'face_img/'
+    all_img_path = 'all_img_json/'
+    for index, imgfile in enumerate(os.listdir(all_img_path)):
+
+        # use PIL, to be consistent with evaluation
+        img_fullName = os.path.join(all_img_path, imgfile)
+        img = read_image(img_fullName, format="BGR")
+        start_time = time.time()
+        predictions = model_demo.predictor(img)
+        bbox = model_demo.highest_only(predictions).get('pred_boxes')
+        if len(bbox.tensor) == 0:
+            print(imgfile)
+            continue
+        bbox = bbox.tensor[0].tolist()
+        all_label = tools.get_all_class_label_infos()
+        json_template = tools.labelme_template()
+        json_template["imageHeight"], json_template["imageWidth"] = img.shape[:2]
+        json_template["imagePath"] = imgfile
+        json_template["imageData"] = str(img_base64(img_fullName), encoding="utf-8")
+        json_template["shapes"][0]["label"] = all_label[imgfile]
+        json_template["shapes"][0]["points"] = [[bbox[0], bbox[1]], [bbox[2], bbox[3]]]
+        json.dump(json_template, open(os.path.join(all_img_path, imgfile.replace('.jpg', '.json')), 'w'), indent=1)
+        # img = Image.open(img_fullName)
+        # img = img.crop((bbox[0], bbox[1], bbox[2], bbox[3]))
+        # img.save(os.path.join(face_img_path, imgfile))
+        if index % 1000 == 0:
+            print(index)
+
+
+if __name__ == "__main__":
+    do_test()

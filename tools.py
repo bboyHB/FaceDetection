@@ -278,11 +278,49 @@ def re_label_json():
             js = json.load(open(os.path.join(new_labeled_img_path, file)))
             n = len(js['shapes'])
             for i in range(n):
-                js['shapes'][i]['label'] = new_label_info[file[:-4]+'jpg']['class']
+                js['shapes'][i]['label'] = new_label_info[file[:-4] + 'jpg']['class']
             json.dump(js, open(os.path.join(temp_path, file), 'w'), indent=1)
 
 
+def labelme_template():
+    tem = {
+        "version": "4.4.0",
+        "flags": {},
+        "shapes": [
+            {
+                "label": "",
+                "points": [
+                    [
+                        0,
+                        0
+                    ],
+                    [
+                        0,
+                        0
+                    ]
+                ],
+                "group_id": None,
+                "shape_type": "rectangle",
+                "flags": {}
+            }
+        ],
+        "imagePath": "",
+        "imageData": "",
+        "imageHeight": 0,
+        "imageWidth": 0
+    }
+    return tem
+
+
+def cut_all_face():
+    save_path = 'face_img'
+    all_img = get_all_class_label_infos()
+    for index, img in enumerate(all_img.keys()):
+        face, _ = img_crop_by_json(os.path.join('all_img_json', img))
+        face[0].save(os.path.join(save_path, img))
+        if index % 1000 == 0:
+            print(index)
+
 
 if __name__ == '__main__':
-    #re_label_json()
     pass

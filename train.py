@@ -35,13 +35,13 @@ VAL_JSON = os.path.join(ANN_ROOT, 'instances_val2017.json')
 # 数据集类别元数据
 DATASET_CATEGORIES = [
     #{"name": "0", "id": 1, "color": [220, 20, 60]},
-    {"name": "1", "id": 1, "color": [220, 20, 60]},
-    {"name": "2", "id": 2, "color": [21, 142, 185]},
-    {"name": "3", "id": 3, "color": [0, 20, 60]},
-    {"name": "4", "id": 4, "color": [219, 142, 0]},
-    {"name": "5", "id": 5, "color": [220, 0, 60]},
-    {"name": "6", "id": 6, "color": [219, 142, 185]},
-    {"name": "7", "id": 7, "color": [119, 142, 185]},
+    {"name": "Surprise", "id": 1, "color": [220, 20, 60]},
+    {"name": "Fear", "id": 2, "color": [21, 142, 185]},
+    {"name": "Disgust", "id": 3, "color": [0, 20, 60]},
+    {"name": "Happy", "id": 4, "color": [219, 142, 0]},
+    {"name": "Sad", "id": 5, "color": [220, 0, 60]},
+    {"name": "Angry", "id": 6, "color": [219, 142, 185]},
+    {"name": "Neutral", "id": 7, "color": [119, 142, 185]},
 ]
 CATEGORIES_NAMES = [k["name"] for k in DATASET_CATEGORIES]
 
