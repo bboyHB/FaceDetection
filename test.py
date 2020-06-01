@@ -326,14 +326,15 @@ def do_test():
         # 还缺少一个表示false的数字，所以我们用7来表示
         # 所以在imgpath.json文件中你只能看到2,3,4,5,6,7这6种数字，其实分别就代表了我们最终要分类的6个类别
 
-        img_paths = tools.get_all_new_label_infos()
+        img_paths = tools.get_all_class_label_infos()
         pred = predictions.get('pred_classes').tolist()
         if len(pred) == 0:
+            print(imgfile)
             predict_list.append('1')
         else:
             predict_list.append(str(pred[0] + 1))
-        real_list.append(img_paths[imgfile]['class'])
-        visualized_output.save(os.path.join('imgout', imgfile))
+        real_list.append(img_paths[imgfile])
+        #visualized_output.save(os.path.join('imgout', imgfile))
         # print(flaw_only(predictions))
         # log会在控制台输出预测所花的时间等等信息
         # logger.info(

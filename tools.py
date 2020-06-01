@@ -9,10 +9,14 @@ import random
 import shutil
 
 label_file_path = 'list_patition_label(1).txt'
-weight_hight_file_path = 'width_height.txt'
+weight_hight_file_path = 'width_height_original.txt'
+face_w_h_file_path = 'width_height_face.txt'
 original_data_path = './original'
+face_img_path = './all face'
+all_img_json = './all_img_json'
 new_labeled_img_path = './random_300x7_img'
 new_label_file_path = 'new_label_infos.txt'
+auto_label_file_path = 'new_auto_label_infos.txt'
 
 
 # label_file_path：包含图片类别标签的文本文件，每一行内容为图片文件名和对应的类别
@@ -133,11 +137,12 @@ def x_y_w_h_clustering():
     km = KMeans()
     x_y = []
     w_h = []
-    new_label_infos = get_all_new_label_infos()
+    new_label_infos = get_all_auto_label_infos()
     for k, v in new_label_infos.items():
         boundings = v['boundings']
         for bounding in boundings:
-            x_y.append([bounding[0] + (bounding[1] - bounding[0]) / 2, bounding[2] + (bounding[3] - bounding[2]) / 2])
+            x_y.append([(bounding[0] + (bounding[1] - bounding[0]) / 2) / v['width'],
+                        (bounding[2] + (bounding[3] - bounding[2]) / 2) / v['height']])
             w_h.append([bounding[1] - bounding[0], bounding[3] - bounding[2]])
     db.fit(x_y)
     plt.scatter([wh[0] for wh in x_y], [wh[1] for wh in x_y], c=db.labels_)
@@ -242,6 +247,31 @@ def get_all_new_label_infos():
     return new_label_info
 
 
+def get_all_auto_label_infos():
+    """
+    获取自动标注（faster rcnn）图片的文件名和对应的标注信息
+    :return: 返回字典形式存储的信息
+    """
+    with open(auto_label_file_path) as lf:
+        lines = lf.readlines()
+        auto_label_info = {}
+        for line in lines:
+            temp_info = {}
+            temp_line = line.strip().split()
+            temp_info['class'] = temp_line[3]
+            temp_info['rec_num'] = int(temp_line[4])
+            boundings = []
+            for i in range(temp_info['rec_num']):
+                bounding = [float(temp_line[i * 4 + 5]), float(temp_line[i * 4 + 6]),
+                            float(temp_line[i * 4 + 7]), float(temp_line[i * 4 + 8])]
+                boundings.append(bounding)
+            temp_info['boundings'] = boundings
+            temp_info['width'] = int(temp_line[1])
+            temp_info['height'] = int(temp_line[2])
+            auto_label_info[temp_line[0]] = temp_info
+    return auto_label_info
+
+
 def labeled_info():
     """
     重新整理label信息，只整理其中的人工标注了的2100张图片，将标注信息整理成TXT
@@ -263,6 +293,31 @@ def labeled_info():
                     new_lrud.append(str(x[2]))
                     new_lrud.append(str(x[3]))
                 nli.write(' '.join([croped_img, class_label_info[croped_img], str(len(lrud))] + new_lrud) + '\n')
+
+
+def auto_labeled_info():
+    """
+    重新整理label信息，整理所有自动标注的15339张图片，将标注信息整理成TXT
+    每一行格式为：图片名 宽 高 表情类别 标注数n 边框1左边界 边框1右边界 边框1上边界 边框1下边界 ... 边框n左边界 边框n右边界 边框n上边界 边n下边界
+    :return:
+    """
+    croped_img_paths = os.listdir(all_img_json)
+    class_label_info = get_all_class_label_infos()
+    with open("new_auto_label_infos.txt", 'w') as nli:
+        for croped_img in croped_img_paths:
+            if croped_img.endswith('.json'):
+                continue
+            if croped_img.endswith('.jpg'):
+                img = Image.open(os.path.join(all_img_json, croped_img))
+                _, lrud = img_crop_by_json(os.path.join(all_img_json, croped_img))
+                new_lrud = []
+                for x in lrud:
+                    new_lrud.append(str(x[0]))
+                    new_lrud.append(str(x[1]))
+                    new_lrud.append(str(x[2]))
+                    new_lrud.append(str(x[3]))
+                nli.write(' '.join([croped_img, str(img.size[0]), str(img.size[1]), class_label_info[croped_img],
+                                    str(len(lrud))] + new_lrud) + '\n')
 
 
 def re_label_json():
@@ -323,4 +378,5 @@ def cut_all_face():
 
 
 if __name__ == '__main__':
+    x_y_w_h_clustering()
     pass
