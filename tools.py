@@ -133,7 +133,7 @@ def x_y_w_h_clustering():
     对标注框中心坐标进行聚类
     :return:
     """
-    db = DBSCAN(eps=10, min_samples=10)
+    db = DBSCAN(eps=0.06, min_samples=3)
     km = KMeans()
     x_y = []
     w_h = []
@@ -338,6 +338,10 @@ def re_label_json():
 
 
 def labelme_template():
+    """
+    labelme输出的json格式模板
+    :return:
+    """
     tem = {
         "version": "4.4.0",
         "flags": {},
@@ -368,6 +372,10 @@ def labelme_template():
 
 
 def cut_all_face():
+    """
+    把所有脸部区域单独裁剪出来保存
+    :return:
+    """
     save_path = 'face_img'
     all_img = get_all_class_label_infos()
     for index, img in enumerate(all_img.keys()):
