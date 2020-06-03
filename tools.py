@@ -12,7 +12,7 @@ label_file_path = 'list_patition_label(1).txt'
 weight_hight_file_path = 'width_height_original.txt'
 face_w_h_file_path = 'width_height_face.txt'
 original_data_path = './original'
-face_img_path = './all face'
+face_img_path = './face_img'
 all_img_json = './all_img_json'
 new_labeled_img_path = './random_300x7_img'
 new_label_file_path = 'new_label_infos.txt'
@@ -386,5 +386,5 @@ def cut_all_face():
 
 
 if __name__ == '__main__':
-    x_y_w_h_clustering()
+    plot_ratios()
     pass
