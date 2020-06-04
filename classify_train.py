@@ -14,6 +14,10 @@ import copy
 from sklearn.model_selection import train_test_split
 import shutil
 import tools
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import accuracy_score
 
 """
 代码参考：
@@ -37,9 +41,9 @@ data_transforms = {
     ]),
 }
 
-model_name = 'resnext101'
+model_name = 'resnet'
 face_dir = 'face_img'
-data_dir = 'face_classify_dataset'
+data_dir = 'face_classify_dataset_aug'
 face_expressions = ["Surprise", "Fear", "Disgust", "Happy", "Sad", "Angry", "Neutral"]
 
 train_path = os.path.join(data_dir, 'train')
@@ -71,7 +75,7 @@ if not os.path.exists(data_dir):
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=2,
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=32,
                                               shuffle=True, num_workers=2)
                for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -167,13 +171,14 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     return model
 
 
-def visualize_model(model, num_images=6):
+def visualize_model(model):
     was_training = model.training
     model.eval()
     images_so_far = 0
-    fig = plt.figure()
 
     with torch.no_grad():
+        real_list = []
+        pred_list = []
         for i, (inputs, labels) in enumerate(dataloaders['val']):
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -181,16 +186,24 @@ def visualize_model(model, num_images=6):
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
 
-            for j in range(inputs.size()[0]):
-                images_so_far += 1
-                ax = plt.subplot(num_images // 2, 2, images_so_far)
-                ax.axis('off')
-                ax.set_title('predicted: {}'.format(class_names[preds[j]]))
-                imshow(inputs.cpu().data[j])
 
-                if images_so_far == num_images:
-                    model.train(mode=was_training)
-                    return
+            real_list.extend(preds.tolist())
+            pred_list.extend(labels.tolist())
+        cm = confusion_matrix(real_list, pred_list)
+        ps = precision_score(real_list, pred_list, average=None)
+        rc = recall_score(real_list, pred_list, average=None)
+        acc = accuracy_score(real_list, pred_list)
+        print(cm)
+        print('precision:', ['{:.2%}'.format(x) for x in ps])
+        print('recall:', ['{:.2%}'.format(x) for x in rc])
+        print('accuracy:', acc)
+
+            # for j in range(inputs.size()[0]):
+            #     images_so_far += 1
+            #
+            #     if images_so_far == num_images:
+            #         model.train(mode=was_training)
+            #         return
         model.train(mode=was_training)
 
 
@@ -289,8 +302,7 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
 
     return model_ft, input_size
 
-
-if __name__ == '__main__':
+def train():
     model_ft, _ = initialize_model(model_name, len(face_expressions), False)
     # num_ftrs = model_ft.classifier.in_features
     # model_ft.classifier = nn.Linear(num_ftrs, len(face_expressions))
@@ -306,9 +318,15 @@ if __name__ == '__main__':
     optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.02, momentum=0.9)
 
     # Decay LR by a factor of 0.1 every 7 epochs
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=100, gamma=0.1)
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=60, gamma=0.1)
 
     model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                           num_epochs=150)
+                           num_epochs=100)
     torch.save(model_ft, 'face_model_{}.pth'.format(model_name))
+
+if __name__ == '__main__':
+    model = torch.load('face_model_resnet18_1.pth')
+    visualize_model(model)
+    model = torch.load('face_model_resnet18_2.pth')
+    visualize_model(model)
     pass
