@@ -130,20 +130,22 @@ def w_h_clustering():
 
 def x_y_w_h_clustering():
     """
-    对标注框中心坐标进行聚类
+    对标注框中心坐标、宽高、面积进行聚类（都是相对位置，数值0~1）
     :return:
     """
     db = DBSCAN(eps=0.06, min_samples=3)
-    km = KMeans()
+    km = KMeans(3)
     x_y = []
     w_h = []
+    area = []
     new_label_infos = get_all_auto_label_infos()
     for k, v in new_label_infos.items():
         boundings = v['boundings']
         for bounding in boundings:
             x_y.append([(bounding[0] + (bounding[1] - bounding[0]) / 2) / v['width'],
                         (bounding[2] + (bounding[3] - bounding[2]) / 2) / v['height']])
-            w_h.append([bounding[1] - bounding[0], bounding[3] - bounding[2]])
+            w_h.append([(bounding[1] - bounding[0]) / v['width'], (bounding[3] - bounding[2]) / v['height']])
+            area.append(((bounding[1] - bounding[0]) * (bounding[3] - bounding[2])) / (v['width'] * v['height']))
     db.fit(x_y)
     plt.scatter([wh[0] for wh in x_y], [wh[1] for wh in x_y], c=db.labels_)
     plt.show()
@@ -154,6 +156,7 @@ def x_y_w_h_clustering():
     print(max(db.labels_), min(db.labels_))
     print(max(km.labels_), min(km.labels_))
 
+    db = DBSCAN(eps=0.012, min_samples=10)
     db.fit(w_h)
     plt.scatter([wh[0] for wh in w_h], [wh[1] for wh in w_h], c=db.labels_)
     plt.show()
@@ -163,6 +166,10 @@ def x_y_w_h_clustering():
 
     print(max(db.labels_), min(db.labels_))
     print(max(km.labels_), min(km.labels_))
+
+    plt.plot([x for x in range(len(area))], sorted(area))
+    plt.show()
+    print(min(area), max(area))
 
 
 def random_300x7_img_from_dataset():
@@ -385,6 +392,31 @@ def cut_all_face():
             print(index)
 
 
+def delete_json():
+    dirs = os.listdir('enforce')
+    for d in dirs:
+        if os.path.isdir(os.path.join('enforce', d)):
+            files = os.listdir(os.path.join('enforce', d))
+            for f in files:
+                if f.endswith('.json'):
+                    os.remove(os.path.join('enforce', d, f))
+
+
+def change_names():
+    files = os.listdir('random_300x7_img')
+    for f in files:
+        if f.endswith('.json'):
+            shutil.copy(os.path.join('random_300x7_img', f),
+                        os.path.join('enforce', 'bright', f.replace('.json', '_bri.json')))
+            shutil.copy(os.path.join('random_300x7_img', f),
+                        os.path.join('enforce', 'color', f.replace('.json', '_color.json')))
+            shutil.copy(os.path.join('random_300x7_img', f),
+                        os.path.join('enforce', 'contrast', f.replace('.json', '_contra.json')))
+            shutil.copy(os.path.join('random_300x7_img', f),
+                        os.path.join('enforce', 'noise', f.replace('.json', '_noise.json')))
+            shutil.copy(os.path.join('random_300x7_img', f),
+                        os.path.join('enforce', 'sharpness', f.replace('.json', '_sharp.json')))
+
 if __name__ == '__main__':
-    plot_ratios()
+    change_names()
     pass

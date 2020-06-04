@@ -333,6 +333,11 @@ def do_test():
             predict_list.append('1')
         else:
             predict_list.append(str(pred[0] + 1))
+        # temp = str(imgfile).split('_')
+        # if temp[1].endswith('.jpg'):
+        #     imgfile = temp[0] + '_' + temp[1]
+        # else:
+        #     imgfile = temp[0] + '_' + temp[1] + '.jpg'
         real_list.append(img_paths[imgfile])
         #visualized_output.save(os.path.join('imgout', imgfile))
         # print(flaw_only(predictions))

@@ -166,13 +166,13 @@ def setup(args):
     cfg.MODEL.WEIGHTS = "detectron2://COCO-Detection/faster_rcnn_R_50_FPN_1x/137257794/model_final_b275ba.pkl" # 'output/model_final.pth'   # 预训练模型权重
     cfg.SOLVER.IMS_PER_BATCH = 2  # batch_size=2; iters_in_one_epoch = dataset_imgs/batch_size
     ITERS_IN_ONE_EPOCH = int(10738 / cfg.SOLVER.IMS_PER_BATCH) #int(1434 / cfg.SOLVER.IMS_PER_BATCH)
-    cfg.SOLVER.MAX_ITER = (ITERS_IN_ONE_EPOCH * 20) - 1  # 12 epochs
+    cfg.SOLVER.MAX_ITER = (ITERS_IN_ONE_EPOCH * 50) - 1  # 12 epochs
     cfg.SOLVER.BASE_LR = 0.02  #学习率
     cfg.SOLVER.MOMENTUM = 0.9
     cfg.SOLVER.WEIGHT_DECAY = 0.0001
     cfg.SOLVER.WEIGHT_DECAY_NORM = 0.0
     cfg.SOLVER.GAMMA = 0.1   # GAMMA和STEPS是相互配合的，意味着iteration到达STEPS中的数量时，把学习率乘以GAMMA
-    cfg.SOLVER.STEPS = (90000, 100000)    # 在这里就是当iteration到达120000时，学习率从0.02变成0.002，因为训练到后面会难以收敛所以要减小学习率使得loss可以到达局部最低点
+    cfg.SOLVER.STEPS = (210000, 250000)    # 在这里就是当iteration到达120000时，学习率从0.02变成0.002，因为训练到后面会难以收敛所以要减小学习率使得loss可以到达局部最低点
     cfg.SOLVER.WARMUP_FACTOR = 1.0 / 10000
     cfg.SOLVER.WARMUP_ITERS = 10000   # 这里WARMUP的作用就是学习率在一开始的ITERS范围内（这里是iteration从0到1000）过程中是从零开始线性递增的
     cfg.SOLVER.WARMUP_METHOD = "linear"

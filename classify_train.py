@@ -37,6 +37,7 @@ data_transforms = {
     ]),
 }
 
+model_name = 'resnext101'
 face_dir = 'face_img'
 data_dir = 'face_classify_dataset'
 face_expressions = ["Surprise", "Fear", "Disgust", "Happy", "Sad", "Angry", "Neutral"]
@@ -76,6 +77,7 @@ dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=2,
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
 print(dataset_sizes, class_names)
+print(image_datasets)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -143,7 +145,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             epoch_loss = running_loss / dataset_sizes[phase]
             epoch_acc = running_corrects.double() / dataset_sizes[phase]
 
-            with open('metrics.txt', 'a') as mt:
+            with open('metrics_{}.txt'.format(model_name), 'a') as mt:
                 mt.write('{},{:.4f},{:.4f}\n'.format(phase, epoch_loss, epoch_acc))
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
@@ -208,6 +210,15 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         """ Resnet18
         """
         model_ft = models.resnet18(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
+        num_ftrs = model_ft.fc.in_features
+        model_ft.fc = nn.Linear(num_ftrs, num_classes)
+        input_size = 224
+
+    elif model_name == "resnext101":
+        """ resnext101
+                """
+        model_ft = models.resnext101_32x8d(pretrained=use_pretrained)
         set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model_ft.fc.in_features
         model_ft.fc = nn.Linear(num_ftrs, num_classes)
@@ -280,12 +291,12 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
 
 
 if __name__ == '__main__':
-    model_ft = models.resnet18(pretrained=True)
+    model_ft, _ = initialize_model(model_name, len(face_expressions), False)
     # num_ftrs = model_ft.classifier.in_features
     # model_ft.classifier = nn.Linear(num_ftrs, len(face_expressions))
-    num_ftrs = model_ft.fc.in_features
-    # nn.Linear(num_ftrs, len(class_names)).
-    model_ft.fc = nn.Linear(num_ftrs, len(face_expressions))
+    # num_ftrs = model_ft.fc.in_features
+    # # nn.Linear(num_ftrs, len(class_names)).
+    # model_ft.fc = nn.Linear(num_ftrs, len(face_expressions))
 
     model_ft = model_ft.to(device)
 
@@ -299,5 +310,5 @@ if __name__ == '__main__':
 
     model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
                            num_epochs=150)
-    torch.save(model_ft, 'face_model_resnet18_2.pth')
+    torch.save(model_ft, 'face_model_{}.pth'.format(model_name))
     pass

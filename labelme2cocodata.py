@@ -107,7 +107,7 @@ class Lableme2CoCo:
 
 
 if __name__ == '__main__':
-    labelme_path = "all_img_json"
+    labelme_path = "enforce_300x7"
     saved_coco_path = "./datasets/"
     # 创建文件
     if not os.path.exists("%scoco/annotations/" % saved_coco_path):
